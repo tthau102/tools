@@ -1,28 +1,15 @@
-## OBO STADIUM WEBSITE
-Simple e-commerce website
+### OBO STADIUM WEBSITE
+Trang thương mại điện tử bán giày
 
-## Systems analysis and design
-[Document here](https://docs.google.com/document/d/1-6Ru2IOioTl3lg0s0TrXmLUL3CNCRertbH4wIG_1z78/edit?usp=sharing)
-
-## Running the application locally
-
-Config ```application.properties``` file:
-```
-spring.datasource.username=DB_USERNAME
-spring.datasource.password=DB_PASSWORD
-spring.datasource.url=jdbc:DB_TYPE://DB_HOST/DB_NAME
-server.port=PORT
-```
-
-There are several ways to run a Spring Boot application on your local machine. One way is to execute the `main` method in the `com.company.demo.DemoApplication` class from your IDE.
-
-Alternatively you can use the [Spring Boot Maven plugin](https://docs.spring.io/spring-boot/docs/current/reference/html/build-tool-plugins-maven-plugin.html) like so:
+### Chạy app bằng maven
 
 ```shell
 mvn spring-boot:run
 ```
 
-Import database from ```obo.sql```. Using two default account:
+### Mockup dữ liệu ban đầu
+
+Import file ```obo.sql``` vào MySQL. Sử dụng 2 account sau để đăng nhập vào web:
 
 - Admin account:
     - Username: admin@obostadium.com
@@ -32,13 +19,8 @@ Import database from ```obo.sql```. Using two default account:
     - Password: 123456
     
 
-To access url ```/admin``` to get admin pages.  
-   
+Truy cập ```/admin``` để vào trang admin.
 
-
-## Built with
+### Built with
 - [Java Spring](https://spring.io/) - The web framework used
 - [Maven](https://mvnrepository.com/) - Dependency Management
-
-## Author
-[Trinh Minh Thuy](https://github.com/minhthuy30197)
