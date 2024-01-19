@@ -3,7 +3,7 @@ pipeline {
   agent none
 
   environment {
-    DOCKER_IMAGE = "hautt/flask-docker"
+    DOCKER_IMAGE = "nhtua/flask-docker"
   }
 
   stages {
