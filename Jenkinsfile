@@ -18,7 +18,7 @@ pipeline {
         sh "pip install poetry"
         sh "poetry install"
         sh "poetry run pytest"
-        sh "cat /etc/os-release"
+        // sh "cat /etc/os-release"
       }
     }
 
