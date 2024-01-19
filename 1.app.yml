@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: obo-config
+data:
+  OBO_IMAGE: your-obo-image
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: obo-ns
+  name: obo-pod
+  labels:
+    pod: obo-pod
+spec:
+  containers:
+    - name: obo-container
+      image: hautt/obo-app
+      env:
+        - name: DB_HOST
+          value: 10.33.10.20
+      resources:
+        limits:
+          memory: "1024Mi"
+          cpu: "1000m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: obo-svc
+  namespace: obo-ns
+spec:
+  selector:
+    pod: obo-pod
+  ports:
+  - port: 8080
+  
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+  name: obo.trantrunghau.id.vn
+  namespace: obo-ns
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: obo.trantrunghau.id.vn
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: obo-svc
+            port: 
+              number: 8080
