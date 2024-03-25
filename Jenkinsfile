@@ -33,7 +33,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', dockerhubCredential) {
+                    docker.withRegistry('https://registry.hub.docker.com', "docker_hub_account") {
                         app.push()
                     }
                 }
