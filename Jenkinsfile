@@ -21,25 +21,25 @@ pipeline {
                 }
             }
         }
-		
+
 		stage('Build Docker-image') {
 			steps {
 				script {
-					app = docker.build(IMAGE_NAME)
+                    sh "docker build -t ${USER_IMAGE}:${IMAGE_TAG} -f ."
 				}
 			}
 		}
 
-		stage('Push Docker Image') {
-			steps {
-				script {
-					docker.withRegistry('https://registry.hub.docker.com', dockerhubCredential) {
-						app.push("${IMAGE_TAG}")
-						app.push("latest")
-					}
-				}
-			}
-		}
+		// stage('Push Docker Image') {
+		// 	steps {
+		// 		script {
+		// 			docker.withRegistry('https://registry.hub.docker.com', dockerhubCredential) {
+		// 				app.push("${IMAGE_TAG}")
+		// 				app.push("latest")
+		// 			}
+		// 		}
+		// 	}
+		// }
 	}
 
 }	
