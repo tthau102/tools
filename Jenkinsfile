@@ -1,5 +1,5 @@
 // git repository info
-def gitRepository = 'http://gitlab.prod.viettq.com/viettq/nodejs-demo-k8s.git'
+def gitRepository = 'https://github.com/trantrunghau0102/Obo-SpringBoot-Java.git'
 def gitBranch = 'master'
 
 // gitlab credentials
@@ -12,7 +12,7 @@ pipeline {
         stage("Checkout SCM") {
             steps {
                 script {
-                    checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: gitlabCredential, url: 'https://github.com/trantrunghau0102/Obo-SpringBoot-Java.git']])
+                    checkout scmGit(branches: [[name: '*/' + ${gitBranch}]], extensions: [], userRemoteConfigs: [[credentialsId: gitlabCredential, url: gitRepository]])
                 }
             }
         }
