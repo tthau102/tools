@@ -5,6 +5,11 @@ def gitBranch = 'master'
 // gitlab credentials
 def gitlabCredential = 'jenkin_github'	
 
+//docker hub credentials
+def dockerhubCredential = "docker_hub_account"
+def IMAGE_NAME = 
+def IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
+
 pipeline {
 	agent any
 			
@@ -16,5 +21,23 @@ pipeline {
                 }
             }
         }
+	}
+
+	stage('Build Docker-image') {
+		steps {
+			script {
+				app = docker.build("hautt/obo-k8s")
+			}
+		}
+	}
+	stage('Push Docker Image') {
+		steps {
+			script {
+				docker.withRegistry('https://registry.hub.docker.com', dockerhubCredential) {
+					app.push("${env.BUILD_NUMBER}")
+					app.push("latest")
+				}
+			}
+		}
 	}
 }	
