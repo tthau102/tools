@@ -44,9 +44,8 @@ pipeline {
             steps {
                 script {
                     sh "kubectl apply -f app.yml"
-                    }
                 }
             }
         }
-
+    }
 }	
