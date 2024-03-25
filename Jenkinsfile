@@ -10,6 +10,8 @@ def dockerhubCredential = "docker_hub_account"
 def IMAGE_NAME = "hautt/obo-k8s"
 def IMAGE_TAG = "${BUILD_NUMBER}"
 
+def CICD_IP = "10.33.10.20"
+
 pipeline {
 	agent any
 			
@@ -42,9 +44,11 @@ pipeline {
 
         stage('Deploy K8s') {
             steps {
-                script {
-                    sh "kubectl apply -f app.yml"
-                }
+                withCredentials([usernamePassword(credentialsId: 'hautt_cicd', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
+                    script {
+                        sh "sshpass -p '$USERPASS' ssh -o 'StrictHostKeyChecking=no' $USERNAME@$CICD_IP \" kubectl apply -f app.yml\""
+					}
+				}
             }
         }
     }
