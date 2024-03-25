@@ -40,7 +40,7 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Deploy K8s') {
             steps {
                 script {
                     sh "kubectl apply -f app.yml"
