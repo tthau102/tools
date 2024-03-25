@@ -25,7 +25,7 @@ pipeline {
 		stage('Build Docker-image') {
 			steps {
 				script {
-                    app = docker.build("hautt/obo-k8s")
+                    app = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
 				}
 			}
 		}
