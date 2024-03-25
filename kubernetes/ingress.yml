@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+  name: obo.trantrunghau.id.vn
+  namespace: obo-ns
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: obo.trantrunghau.id.vn
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: obo-svc
+            port: 
+              number: 8080
