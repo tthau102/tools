@@ -39,6 +39,15 @@ pipeline {
                 }
             }
         }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    sh "kubectl apply -f app.yml"
+                    }
+                }
+            }
+        }
 	}
 
 }	
