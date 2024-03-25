@@ -8,7 +8,7 @@ def gitlabCredential = 'jenkin_github'
 //docker hub credentials
 def dockerhubCredential = "docker_hub_account"
 def IMAGE_NAME = "hautt/obo-k8s"
-def IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
+def IMAGE_TAG = "${BUILD_NUMBER}"
 
 pipeline {
 	agent any
