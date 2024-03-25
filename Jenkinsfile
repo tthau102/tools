@@ -7,7 +7,7 @@ def gitlabCredential = 'jenkin_github'
 
 //docker hub credentials
 def dockerhubCredential = "docker_hub_account"
-def IMAGE_NAME = 
+def IMAGE_NAME = "hautt/obo-k8s"
 def IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
 
 pipeline {
@@ -26,7 +26,7 @@ pipeline {
 	stage('Build Docker-image') {
 		steps {
 			script {
-				app = docker.build("hautt/obo-k8s")
+				app = docker.build(IMAGE_NAME)
 			}
 		}
 	}
