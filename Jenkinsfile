@@ -30,16 +30,15 @@ pipeline {
 			}
 		}
 
-		// stage('Push Docker Image') {
-		// 	steps {
-		// 		script {
-		// 			docker.withRegistry('https://registry.hub.docker.com', dockerhubCredential) {
-		// 				app.push("${IMAGE_TAG}")
-		// 				app.push("latest")
-		// 			}
-		// 		}
-		// 	}
-		// }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', dockerhubCredential) {
+                        app.push()
+                    }
+                }
+            }
+        }
 	}
 
 }	
