@@ -46,7 +46,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'hautt_cicd', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
                     script {
-						sh "sshpass -p '$USERPASS' ssh -o 'StrictHostKeyChecking=no' $USERNAME@$CICD_IP \" docker cp .kube/config jenkins-server:/tmp/kubernetes_config\""
+						sh "sshpass -p '$USERPASS' ssh -o 'StrictHostKeyChecking=no' $USERNAME@$CICD_IP \" docker cp /home/hautt/.kube/config jenkins-server:/tmp/kubernetes_config\""
                         sh "kubectl apply -f app.yml --kubeconfig=//tmp/kubernetes_config"
 					}
 				}
