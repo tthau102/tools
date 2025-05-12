@@ -109,7 +109,3 @@ Environment variables:
 Tran Trung Hau - [trunghautran0102@gmail.com](mailto:trunghautran0102@gmail.com)
 
 Project Link: [https://github.com/trantrunghau0102/SpringBoot-Pipeline](https://github.com/trantrunghau0102/SpringBoot-Pipeline)
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
