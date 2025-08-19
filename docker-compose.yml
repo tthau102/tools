@@ -1,0 +1,47 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: obo-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: obo
+      MYSQL_USER: obo
+      MYSQL_PASSWORD: obo123
+      MYSQL_ROOT_PASSWORD: root123
+    ports:
+      - "3306:3306"
+    volumes:
+      # Lưu data ra ngoài
+      - db_data:/var/lib/mysql
+      # Tự động chạy seed khi lần đầu khởi tạo
+      - ./obo.sql:/docker-entrypoint-initdb.d/obo.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot123"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # app:
+  #   # Dùng Dockerfile trong repo để build
+  #   # build:
+  #   #   context: .
+  #   #   dockerfile: Dockerfile
+  #   image: hautt/obo-app
+  #   container_name: obo-app
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   environment:
+  #     # App của bạn đọc các biến DB_HOST/DB_USERNAME/DB_PASSWORD (đã nêu trong README)
+  #     DB_HOST: db
+  #     DB_USERNAME: obo
+  #     DB_PASSWORD: obo123
+  #     # Nếu app cần DB name/port, có sẵn:
+  #     # DB_NAME: obo
+  #     # DB_PORT: 3306
+  #   ports:
+  #     - "8080:8080"
+  #   restart: unless-stopped
+
+volumes:
+  db_data:

@@ -1,0 +1,156 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: obo-ns
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: obo-db-secret
+  namespace: obo-ns
+type: Opaque
+stringData:
+  DB_PASSWORD: "obo123"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: obo-config
+  namespace: obo-ns
+data:
+  # Cách 1 (đơn giản): app đọc 3 biến này để tự build JDBC URL
+  DB_HOST: "mysql-external"
+  DB_USERNAME: "obo"
+  DB_NAME: "obo"
+  DB_PORT: "3306"
+  # Cách 2 (ép URL rõ ràng) — nếu gặp lỗi public key/SSL:
+  SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-external:3306/obo?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+
+---
+# Service đại diện MySQL ngoài cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-external
+  namespace: obo-ns
+spec:
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+  type: ClusterIP
+
+---
+# Endpoints ánh xạ tới IP host MySQL thật
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: mysql-external
+  namespace: obo-ns
+subsets:
+- addresses:
+  - ip: 10.25.10.194    # đổi nếu DB host khác
+  ports:
+  - name: mysql
+    port: 3306
+    protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: obo-app
+  namespace: obo-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: obo-app
+  template:
+    metadata:
+      labels:
+        app: obo-app
+    spec:
+      containers:
+        - name: obo-app
+          image: hautt/obo-app:v0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            # Cách 1: để app tự compose JDBC từ 3 biến
+            - name: DB_HOST
+              valueFrom: { configMapKeyRef: { name: obo-config, key: DB_HOST } }
+            - name: DB_USERNAME
+              valueFrom: { configMapKeyRef: { name: obo-config, key: DB_USERNAME } }
+            - name: DB_PASSWORD
+              valueFrom: { secretKeyRef: { name: obo-db-secret, key: DB_PASSWORD } }
+            - name: DB_NAME
+              valueFrom: { configMapKeyRef: { name: obo-config, key: DB_NAME } }
+            - name: DB_PORT
+              valueFrom: { configMapKeyRef: { name: obo-config, key: DB_PORT } }
+            # Cách 2 (tuỳ chọn): ép Spring dùng URL này
+            # - name: SPRING_DATASOURCE_URL
+            #   valueFrom: { configMapKeyRef: { name: obo-config, key: SPRING_DATASOURCE_URL } }
+
+            # Tuỳ chọn: tắt devtools restart trong container cho nhẹ
+            - name: SPRING_DEVTOOLS_RESTART_ENABLED
+              value: "false"
+
+          # Dùng TCP probe để tránh 404 nếu "/" không tồn tại
+          # readinessProbe:
+          #   tcpSocket: { port: 8080 }
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 10
+          # livenessProbe:
+          #   tcpSocket: { port: 8080 }
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 20
+
+          # resources:
+          #   requests: { cpu: 100m, memory: 256Mi }
+          #   limits:   { cpu: 500m, memory: 512Mi }
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: obo-app-svc
+  namespace: obo-ns
+spec:
+  selector:
+    app: obo-app
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+
+---
+# Tuỳ bạn nếu có NGINX Ingress + cert-manager
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: obo-app-ing
+  namespace: obo-ns
+  # annotations:
+  #   kubernetes.io/ingress.class: nginx
+  #   cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  # tls:
+  #   - hosts: [ "obo.k8s.onprem.thweb.click" ]
+  #     secretName: obo-tls
+  ingressClassName: nginx
+  rules:
+    - host: obo.k8s.onprem.thweb.click
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: obo-app-svc
+                port:
+                  number: 80

@@ -2,12 +2,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-  name: obo.trantrunghau.id.vn
+  name: obo.k8s.onprem.thweb.click
   namespace: obo-ns
 spec:
   ingressClassName: nginx
   rules:
-  - host: obo.trantrunghau.id.vn
+  - host: obo.k8s.onprem.thweb.click
     http:
       paths:
       - pathType: Prefix
