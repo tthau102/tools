@@ -13,21 +13,16 @@ if [ -n "$1" ]; then
 fi
 
 # Lấy thông tin Git
-remote=$(git remote -v | head -n1 | cut -d' ' -f1)
+remote=$(git remote | head -n 1)
 changed_files=$(git diff --name-only --cached)
+stats=$(git diff --cached --stat | tail -n 1)
 
-# Parse stats với insertions/deletions
-stats=$(git diff --cached --shortstat)
-if [[ $stats =~ ([0-9]+)\ file.*([0-9]+)\ insertion.*([0-9]+)\ deletion ]]; then
-    files_text="${BASH_REMATCH[1]} files (+${BASH_REMATCH[2]}, -${BASH_REMATCH[3]})"
-elif [[ $stats =~ ([0-9]+)\ file.*([0-9]+)\ insertion ]]; then
-    files_text="${BASH_REMATCH[1]} files (+${BASH_REMATCH[2]})"
-elif [[ $stats =~ ([0-9]+)\ file.*([0-9]+)\ deletion ]]; then
-    files_text="${BASH_REMATCH[1]} files (-${BASH_REMATCH[2]})"
-elif [[ $stats =~ ([0-9]+)\ file ]]; then
-    files_text="${BASH_REMATCH[1]} files"
+# Parse số lượng files từ stats
+if [[ $stats =~ ([0-9]+)\ file ]]; then
+    file_count="${BASH_REMATCH[1]}"
+    files_text="$file_count files"
 else
-    files_text="No files changed"
+    files_text="No files"
 fi
 
 # Kiểm tra AWS credentials
@@ -38,6 +33,7 @@ fi
 
 # Tạo commit message
 if [ "$use_ai" = true ]; then
+    # Lấy diff content
     diff_content=$(git diff --cached | head -c 10000)
     
     prompt=$(cat <<EOF
@@ -59,6 +55,7 @@ Quy tắc:
 EOF
 )
 
+    # Tạo file request tạm thời
     request_file=$(mktemp)
     response_file=$(mktemp)
 
@@ -75,6 +72,7 @@ EOF
 }
 EOF
 
+    # Gọi Bedrock API
     if aws bedrock-runtime invoke-model \
         --model-id apac.anthropic.claude-3-5-sonnet-20241022-v2:0 \
         --body file://$request_file \
@@ -85,6 +83,7 @@ EOF
         commit_message=$(cat "$response_file" | jq -r '.content[0].text' 2>/dev/null)
         commit_message=$(echo "$commit_message" | tr -d '\n' | tr -d '\r')
         
+        # Fallback nếu AI response không hợp lệ
         if [ -z "$commit_message" ] || [ "$commit_message" = "null" ]; then
             use_ai=false
         fi
@@ -92,6 +91,7 @@ EOF
         use_ai=false
     fi
 
+    # Xóa files tạm
     rm -f "$request_file" "$response_file"
 fi
 
@@ -102,12 +102,10 @@ fi
 
 # Hiển thị thông tin confirm
 echo ""
-echo "════════════════════════════════════════"
 echo "Remote: $remote"
 echo "Branch: $branch"
 echo "Commit message: $commit_message"
 echo "Files changed: $files_text"
-echo "════════════════════════════════════════"
 echo ""
 read -p "Proceed? (y/n): " confirm
 
@@ -117,10 +115,12 @@ if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
 fi
 
 # Thực hiện commit và push
-echo ""
-echo "════════════════════════════════════════"
 git add .
 git commit -m "$commit_message"
-echo "----------------------------------------"
-git push -u origin $branch --force-with-lease
-echo "════════════════════════════════════════"
+
+if git push -u origin $branch --force-with-lease; then
+    echo "Changes pushed to $branch branch"
+else
+    echo "Push failed"
+    exit 1
+fi
