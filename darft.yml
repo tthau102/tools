@@ -1,25 +1,23 @@
 services:
   db:
     image: mysql:8.0
-    container_name: obo-mysql
+    container_name: obo_mysql
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: obo
-      MYSQL_USER: obo
-      MYSQL_PASSWORD: obo123
-      MYSQL_ROOT_PASSWORD: root123
-    ports:
-      - "3306:3306"
+      MYSQL_DATABASE: obo_db
+      MYSQL_USER: obo_user
+      MYSQL_PASSWORD: obopasswd
+      MYSQL_ROOT_PASSWORD: rootpasswd
+    ports: 
+      - 3306:3306
     volumes:
-      # Lưu data ra ngoài
       - db_data:/var/lib/mysql
-      # Tự động chạy seed khi lần đầu khởi tạo
       - ./obo.sql:/docker-entrypoint-initdb.d/obo.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot123"]
       interval: 5s
       timeout: 3s
       retries: 20
-
+      
 volumes:
   db_data:
